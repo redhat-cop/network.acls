@@ -1,28 +1,41 @@
-# Network Acls Validated Content
-[![Test collection](https://github.com/redhat-cop/network.acls/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/redhat-cop/network.acls/actions/workflows/tests.yml)[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7660/badge)](https://bestpractices.coreinfrastructure.org/projects/7660)
+# Ansible Network Acls
+
+[![CI](https://github.com/redhat-cop/network.acls/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/redhat-cop/network.acls/actions/workflows/tests.yml)[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7660/badge)](https://bestpractices.coreinfrastructure.org/projects/7660)
 
 This repository contains the `network.acls` Ansible Collection.
 
-## Description
+## About
 
-The `network.acls` enables users to manage the acls resources independent of platforms and perform acls health checks.
+- Ansible Network Acls Collection contains the role that provides a platform-agnostic way of
+  managing acls resources. This collection provides the user the capabilities to gather,
+  deploy, remediate, configure and perform health checks for network acls resources.
 
-## Tested with Ansible
+- Network Acls collection can be used by anyone who is looking to manage and maintain acls resources. This includes system administrators and IT professionals.
 
-Tested with ansible-core >=2.14 releases.
+## Requirements
+
+- [Requires Ansible](https://github.com/redhat-cop/network.acls/blob/main/meta/runtime.yml)
+- [Requires Content Collections](https://github.com/redhat-cop/network.acls/blob/main/galaxy.yml#L5https://forum.ansible.com/c/news/5/none)
+- [Testing Requirements](https://github.com/redhat-cop/network.acls/blob/main/test-requirements.txt)
+- Users also need to include platform collections as per their requirements. The supported platform collections are:
+  - [arista.eos](https://github.com/ansible-collections/arista.eos)
+  - [cisco.ios](https://github.com/ansible-collections/cisco.ios)
+  - [cisco.iosxr](https://github.com/ansible-collections/cisco.iosxr)
+  - [cisco.nxos](https://github.com/ansible-collections/cisco.nxos)
+  - [junipernetworks.junos](https://github.com/ansible-collections/junipernetworks.junos)
 
 ## Installation
-To consume this Validated Content from Automation Hub, the following needs to be added to `ansible.cfg`:
-
+To consume this Validated Content from Automation Hub, the following needs to be added to ansible.cfg:
 ```
 [galaxy]
 server_list = automation_hub
 
 [galaxy_server.automation_hub]
-url=https://cloud.redhat.com/api/automation-hub/
+url=https://console.redhat.com/api/automation-hub/content/published/
 auth_url=https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
 token=<SuperSecretToken>
 ```
+
 Get the required token from the [Automation Hub Web UI](https://console.redhat.com/ansible/automation-hub/token).
 
 With this configured, simply run the following commands:
@@ -32,14 +45,14 @@ ansible-galaxy collection install network.base
 ansible-galaxy collection install network.acls
 ```
 
-**Capabilities**
+## Use Cases
+
 - `Build Brownfield Inventory`: This enables users to fetch the YAML structured resource module facts for acls resources like acls and acls_interfaces and save them as host_vars to a local or remote data store which could be used as a single SOT for other operations.
 - `Acls Resource Management`: Users want to be able to manage the acls and acl_interfaces configurations.
   This also includes the enablement of gathering facts, updating acls resource host-vars, and deploying config onto the appliance.
 - `Acls Health Checks`: Users want to be able to perform health checks for acls applications. These health checks should be able to provide the acls configuration status with the necessary details.
 - Detect Drift and remediate: This enables users to detect any drift between the provided config and running-config and if required then override the running config.
 
-### Usage
 This platform-agnostic role enables the user to perform acls health checks. Users can perform the following health checks:
        `available_acls`
        `details`
@@ -73,7 +86,7 @@ health_checks.yml
 The result of a successful Persist operation would be host_vars having YAML formatted resource facts.
 - These host_vars could exist locally or even be published to a remote repository acting as SOT for operations like deploy, remediate, detect, etc.
 
-#### - fetch acls resource facts and build local data_store.
+#### fetch acls resource facts and build local data_store.
 ```yaml
 - name: Persist the facts into host vars
   hosts: rtr1
@@ -90,7 +103,7 @@ The result of a successful Persist operation would be host_vars having YAML form
         local: "~/backup/network"
 ```
 
-#### - fetch acls resource facts and publish persisted host_vars inventory to the GitHub repository.
+#### fetch acls resource facts and publish persisted host_vars inventory to the GitHub repository.
 ```yaml
 - name: Persist the facts into remote data_store which is a github repository
   hosts: rtr1
@@ -265,18 +278,71 @@ The remediate operation will read the facts from the Github repository and remed
               email: "{{ your_email@example.com }}"
 ```
 
+## Testing
+
+The project uses tox to run `ansible-lint` and `ansible-test sanity`.
+Assuming this repository is checked out in the proper structure,
+e.g. `collections_root/ansible_collections/network/acls`, run:
+
+```shell
+  tox -e ansible-lint
+  tox -e py39-sanity
+```
+
+To run integration tests, ensure that your inventory has a `network_base` group.
+Depending on what test target you are running, comment out the host(s).
+
+```shell
+[network_hosts]
+ios
+junos
+
+[ios:vars]
+< enter inventory details for this group >
+
+[junos:vars]
+< enter inventory details for this group >
+```
+
+```shell
+  ansible-test network-integration -i /path/to/inventory --python 3.9 [target]
+```
+
+## Contributing
+
+We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against this repository.
+
+Don't know how to start? Refer to the [Ansible community guide](https://docs.ansible.com/ansible/devel/community/index.html)!
+
+Want to submit code changes? Take a look at the [Quick-start development guide](https://docs.ansible.com/ansible/devel/community/create_pr_quick_start.html).
+
+We also use the following guidelines:
+
+* [Collection review checklist](https://docs.ansible.com/ansible/devel/community/collection_contributors/collection_reviewing.html)
+* [Ansible development guide](https://docs.ansible.com/ansible/devel/dev_guide/index.html)
+* [Ansible collection development guide](https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#contributing-to-collections)
+
 ### Code of Conduct
 This collection follows the Ansible project's
 [Code of Conduct](https://docs.ansible.com/ansible/devel/community/code_of_conduct.html).
 Please read and familiarize yourself with this document.
 
-
 ## Release notes
 
 Release notes are available [here](https://github.com/redhat-cop/network.acls/blob/main/CHANGELOG.rst).
+
+## Related information
+
+- [Developing network resource modules](https://github.com/ansible-network/networking-docs/blob/main/rm_dev_guide.md)
+- [Ansible Networking docs](https://github.com/ansible-network/networking-docs)
+- [Ansible Collection Overview](https://github.com/ansible-collections/overview)
+- [Ansible Roles overview](https://docs.ansible.com/ansible/2.9/user_guide/playbooks_reuse_roles.html)
+- [Ansible User guide](https://docs.ansible.com/ansible/latest/user_guide/index.html)
+- [Ansible Developer guide](https://docs.ansible.com/ansible/latest/dev_guide/index.html)
+- [Ansible Community Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html)
 
 ## Licensing
 
 GNU General Public License v3.0 or later.
 
-See [COPYING](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
+See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
